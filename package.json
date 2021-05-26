@@ -1,5 +1,5 @@
 {
-  "name": "wpe-template-init",
+  "name": "wpe-template-helper",
   "version": "0.5.0",
   "description": "This action handles repo initialization for the WPE template.",
   "main": "lib/index.js",
