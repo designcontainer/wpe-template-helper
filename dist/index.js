@@ -13521,7 +13521,7 @@ async function run() {
 
 		const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
-		const repoUrl = `git@github.com:${owner}/${repo}.git`;
+		const repoUrl = `https://git@github.com:${owner}/${repo}.git`;
 
 		core.startGroup('Started initialization');
 
