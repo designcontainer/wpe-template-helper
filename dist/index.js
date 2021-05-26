@@ -3269,11 +3269,11 @@ module.exports = { handleNewCore };
  *
  * @param {string} workingPath The working path.
  */
-handleNewCore = async (workingPath) => {
-	const coreCompressed = await this.downloadCore(workingPath);
-	const corePath = await this.extractCore(coreCompressed, workingPath);
-	await this.moveCore(corePath, workingPath);
-};
+async function handleNewCore(workingPath) {
+	const coreCompressed = await downloadCore(workingPath);
+	const corePath = await extractCore(coreCompressed, workingPath);
+	await moveCore(corePath, workingPath);
+}
 
 /**
  * Downloads a new core zip file from Wordpress.org.
@@ -3281,7 +3281,7 @@ handleNewCore = async (workingPath) => {
  * @param {string} workingPath The working path.
  * @return {string} Returns a string with the zip file path.
  */
-downloadCore = async (workingPath) => {
+async function downloadCore(workingPath) {
 	const url = 'https://wordpress.org/latest.zip';
 	const file = path.join(workingPath, 'core.zip');
 
@@ -3295,7 +3295,7 @@ downloadCore = async (workingPath) => {
 			fs.writeFileSync(file, result.data);
 			return file;
 		});
-};
+}
 
 /**
  * Extracts the core zip file and removes the unneccesary files and folders.
@@ -3304,7 +3304,7 @@ downloadCore = async (workingPath) => {
  * @param {string} outputPath Where the zip should get extracted to.
  * @return {string} Returns a string with the core folder path.
  */
-extractCore = async (zip, outputPath) => {
+async function extractCore(zip, outputPath) {
 	// Unzip file
 	await anzip(zip, { outputPath });
 	// Remove zip file
@@ -3315,7 +3315,7 @@ extractCore = async (zip, outputPath) => {
 	rimraf.sync(path.join(corePath, 'wp-content'));
 
 	return corePath;
-};
+}
 
 /**
  * Moves the new core to the install directory.
@@ -3323,12 +3323,12 @@ extractCore = async (zip, outputPath) => {
  * @param {string} corePath The core folder path.
  * @param {string} outputPath Where the core should be moved.
  */
-moveCore = async (corePath, workingPath) => {
+async function moveCore(corePath, workingPath) {
 	fs.copySync(corePath, workingPath);
 	rimraf(corePath, (error) => {
 		if (error) throw new Error(error);
 	});
-};
+}
 
 
 /***/ }),
