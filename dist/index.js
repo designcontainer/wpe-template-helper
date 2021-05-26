@@ -6209,8 +6209,8 @@ const { getAuthanticatedUrl } = __webpack_require__(918);
 
 module.exports = { handleTheme };
 
-async function handleTheme(token, themeUrl, dir, git) {
-	const themes = path.join(dir, 'wp-content', 'themes');
+async function handleTheme(token, themeUrl, dir, name, git) {
+	const themes = path.join(dir, 'wp-content', 'themes', name);
 
 	await git.clone(getAuthanticatedUrl(token, themeUrl), themes, { '--depth': 1 });
 }
@@ -13576,7 +13576,7 @@ async function run() {
 		 * Download the latest starter theme.
 		 */
 		core.startGroup('Download the latest starter theme');
-		await handleTheme(dir, themeUrl, gitHubKey);
+		await handleTheme(gitHubKey, themeUrl, dir, repo, git);
 		core.endGroup();
 
 		/**
