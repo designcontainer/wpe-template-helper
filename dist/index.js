@@ -6474,14 +6474,10 @@ exports.parseStringResponse = parseStringResponse;
 const core = __webpack_require__(186);
 const { getAuthanticatedUrl } = __webpack_require__(918);
 
-module.exports = { clone, push, areFilesChanged, getBranches };
+module.exports = { clone, push, areFilesChanged };
 
 async function clone(token, remote, dir, git) {
 	await git.clone(getAuthanticatedUrl(token, remote), dir, { '--depth': 1 });
-}
-
-async function getBranches(git) {
-	return await git.branchLocal();
 }
 
 async function push(token, url, branchName, message, committerUsername, committerEmail, git) {
@@ -13519,7 +13515,7 @@ const simpleGit = __webpack_require__(477);
 const path = __webpack_require__(622);
 const { mkdir } = __webpack_require__(747).promises;
 
-const { clone, push, areFilesChanged, getBranches } = __webpack_require__(374);
+const { clone, push, areFilesChanged } = __webpack_require__(374);
 const { handleNewCore } = __webpack_require__(187);
 const { handleTheme } = __webpack_require__(339);
 
