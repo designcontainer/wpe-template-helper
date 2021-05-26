@@ -4431,7 +4431,7 @@ exports.parseStringResponse = parseStringResponse;
 const core = __webpack_require__(186);
 const { getAuthanticatedUrl } = __webpack_require__(918);
 
-module.exports = { createBranch, clone, push, areFilesChanged, getBranches };
+module.exports = { clone, push, areFilesChanged, getBranches };
 
 async function clone(token, remote, dir, git) {
 	await git.clone(getAuthanticatedUrl(token, remote), dir, { '--depth': 1 });
