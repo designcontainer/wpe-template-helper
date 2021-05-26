@@ -13522,7 +13522,6 @@ async function run() {
 		const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
 		const repoUrl = `git@github.com:${owner}/${repo}.git`;
-		const branches = await getBranches(git);
 
 		core.startGroup('Started initialization');
 
@@ -13539,6 +13538,7 @@ async function run() {
 
 		core.info('Push');
 		if (await areFilesChanged(git)) {
+			const branches = await getBranches(git);
 			await push(
 				gitHubKey,
 				repoUrl,
