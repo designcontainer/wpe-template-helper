@@ -3267,6 +3267,7 @@ module.exports = { handleNewCore };
 /**
  * Handles the install and setup of the wordpress core.
  *
+ * @async
  * @param {string} workingPath The working path.
  */
 async function handleNewCore(workingPath) {
@@ -3278,6 +3279,7 @@ async function handleNewCore(workingPath) {
 /**
  * Downloads a new core zip file from Wordpress.org.
  *
+ * @async
  * @param {string} workingPath The working path.
  * @return {string} Returns a string with the zip file path.
  */
@@ -3300,6 +3302,7 @@ async function downloadCore(workingPath) {
 /**
  * Extracts the core zip file and removes the unneccesary files and folders.
  *
+ * @async
  * @param {string} zip The zip file.
  * @param {string} outputPath Where the zip should get extracted to.
  * @return {string} Returns a string with the core folder path.
@@ -3320,14 +3323,13 @@ async function extractCore(zip, outputPath) {
 /**
  * Moves the new core to the install directory.
  *
+ * @async
  * @param {string} corePath The core folder path.
  * @param {string} outputPath Where the core should be moved.
  */
 async function moveCore(corePath, workingPath) {
 	fs.copySync(corePath, workingPath);
-	rimraf(corePath, (error) => {
-		if (error) throw new Error(error);
-	});
+	rimraf.sync(corePath);
 }
 
 
@@ -13521,6 +13523,8 @@ async function run() {
 
 		const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
+		const branch = process.env.GITHUB_REF;
+
 		const repoUrl = `https://github.com/${owner}/${repo}`;
 
 		core.startGroup('Started initialization');
@@ -13536,13 +13540,12 @@ async function run() {
 		core.info('Download latest WordPress');
 		await handleNewCore(dir);
 
-		const branches = await getBranches(git);
-		core.info(`Pushing to ${branches}`);
+		core.info(branch);
 		if (await areFilesChanged(git)) {
 			await push(
 				gitHubKey,
 				repoUrl,
-				'master',
+				branch,
 				commitMessage,
 				committerUsername,
 				committerEmail,
