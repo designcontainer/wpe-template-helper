@@ -3314,8 +3314,6 @@ async function extractCore(zip, outputPath) {
 	fs.unlinkSync(zip);
 	// The zip contents path
 	const corePath = path.join(outputPath, 'wordpress');
-	// Remove the wp-content folder
-	rimraf.sync(path.join(corePath, 'wp-content'));
 
 	return corePath;
 }
@@ -6198,7 +6196,27 @@ module.exports = copySync
 
 
 /***/ }),
-/* 339 */,
+/* 339 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const fs = __webpack_require__(630);
+const path = __webpack_require__(622);
+const axios = __webpack_require__(545);
+const anzip = __webpack_require__(464);
+const rimraf = __webpack_require__(959);
+
+const { getAuthanticatedUrl } = __webpack_require__(918);
+
+module.exports = { handleTheme };
+
+async function handleTheme(token, themeUrl, dir, git) {
+	const themes = path.join(dir, 'wp-content', 'themes');
+
+	await git.clone(getAuthanticatedUrl(token, themeUrl), themes, { '--depth': 1 });
+}
+
+
+/***/ }),
 /* 340 */,
 /* 341 */,
 /* 342 */,
@@ -13503,6 +13521,7 @@ const { mkdir } = __webpack_require__(747).promises;
 
 const { clone, push, areFilesChanged, getBranches } = __webpack_require__(374);
 const { handleNewCore } = __webpack_require__(187);
+const { handleTheme } = __webpack_require__(339);
 
 const triggerEventName = process.env.GITHUB_EVENT_NAME;
 const eventPayload = require(process.env.GITHUB_EVENT_PATH);
@@ -13515,32 +13534,55 @@ async function run() {
 	core.debug(JSON.stringify(eventPayload, null, 2));
 
 	try {
+		// Action inputs
 		const gitHubKey =
 			process.env.GITHUB_TOKEN || core.getInput('github_token', { required: true });
+		const starterTheme = core.getInput('starter_theme', { required: true });
 		const committerUsername = core.getInput('committer_username');
 		const committerEmail = core.getInput('committer_email');
 		const commitMessage = core.getInput('commit_message');
-
+		// Envs
 		const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
-
 		const branch = process.env.GITHUB_REF;
-
+		// Other
 		const repoUrl = `https://github.com/${owner}/${repo}`;
+		const themeUrl = `https://github.com/${starterTheme}`;
 
+		/**
+		 * Start initialization by creating a working dir.
+		 */
 		core.startGroup('Started initialization');
-
 		core.info('Create working dir');
 		const dir = path.join(process.cwd(), './clone', repo);
 		await mkdir(dir, { recursive: true });
+		core.endGroup();
 
-		core.info(`Clone ${repo} by ${owner}`);
+		/**
+		 * Clone working repo.
+		 */
+		core.startGroup(`Clone ${repo} by ${owner}`);
 		const git = simpleGit({ baseDir: dir });
 		await clone(gitHubKey, repoUrl, dir, git);
+		core.endGroup();
 
-		core.info('Download latest WordPress');
+		/**
+		 * Download the latest WordPress core.
+		 */
+		core.startGroup('Download latest WordPress');
 		await handleNewCore(dir);
+		core.endGroup();
 
-		core.info(branch);
+		/**
+		 * Download the latest starter theme.
+		 */
+		core.startGroup('Download the latest starter theme');
+		await handleTheme(dir, themeUrl, gitHubKey);
+		core.endGroup();
+
+		/**
+		 * Commit and push all changes to repo.
+		 */
+		core.startGroup('Push to repo');
 		if (await areFilesChanged(git)) {
 			await push(
 				gitHubKey,
@@ -13552,7 +13594,6 @@ async function run() {
 				git
 			);
 		}
-
 		core.endGroup();
 	} catch (error) {
 		core.setFailed(`Action failed because of: ${error}`);
