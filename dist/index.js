@@ -6148,7 +6148,35 @@ exports.parseBranchSummary = parseBranchSummary;
 /* 265 */,
 /* 266 */,
 /* 267 */,
-/* 268 */,
+/* 268 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const axios = __webpack_require__(545);
+
+module.exports = { addTopics };
+
+async function addTopics(token, owner, repo) {
+	const url = `https://api.github.com/repos/${owner}/${repo}/topics`;
+
+	return await axios
+		.request({
+			url,
+			method: 'PUT',
+			user: `${owner}:${token}`,
+			headers: {
+				Accept: application / vnd.github.mercy - preview + json,
+			},
+			data: {
+				names: ['site', 'wpengine', 'global-ci'],
+			},
+		})
+		.then((result) => {
+			return result;
+		});
+}
+
+
+/***/ }),
 /* 269 */,
 /* 270 */,
 /* 271 */,
@@ -15606,6 +15634,7 @@ const { handleNewCore } = __webpack_require__(187);
 const { handleTheme } = __webpack_require__(339);
 const { handleComposer } = __webpack_require__(427);
 const { handleReadme } = __webpack_require__(479);
+const { addTopics } = __webpack_require__(268);
 const { cleanup } = __webpack_require__(767);
 
 const triggerEventName = process.env.GITHUB_EVENT_NAME;
@@ -15678,6 +15707,13 @@ async function run() {
 		 */
 		core.startGroup('Create a readme.md');
 		await handleReadme(dir, owner, repo);
+		core.endGroup();
+
+		/**
+		 * Add topics
+		 */
+		core.startGroup('Add topics');
+		await addTopics(gitHubKey, owner, repo);
 		core.endGroup();
 
 		/**
