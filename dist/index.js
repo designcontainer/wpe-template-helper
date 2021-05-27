@@ -6156,22 +6156,27 @@ const axios = __webpack_require__(545);
 module.exports = { addTopics };
 
 async function addTopics(token, owner, repo) {
-	const url = `https://api.github.com/repos/${owner}/${repo}/topics`;
-
-	return await axios
-		.request({
-			url,
-			method: 'PUT',
-			user: `${owner}:${token}`,
-			headers: {
-				Accept: 'application/vnd.github.mercy-preview+json',
-			},
-			data: {
-				names: ['site', 'wpengine', 'global-ci'],
-			},
+	return await axios({
+		method: 'put',
+		url: `https://api.github.com/repos/${owner}/${repo}/topics`,
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json',
+			Accept: 'application/vnd.github.mercy-preview+json',
+		},
+		auth: {
+			username: owner,
+			password: token,
+		},
+		data: {
+			names: ['site', 'wpengine', 'global-ci'],
+		},
+	})
+		.then((res) => {
+			console.log(res);
 		})
-		.then((result) => {
-			return result;
+		.catch((err) => {
+			console.log(err);
 		});
 }
 
