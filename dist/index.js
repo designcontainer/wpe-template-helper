@@ -6155,7 +6155,9 @@ const axios = __webpack_require__(545);
 
 module.exports = { addTopics };
 
-async function addTopics(token, owner, repo) {
+async function addTopics(token, owner, repo, topics) {
+    const topicsArray = topics ? parseCommaList(topics) : [];
+
 	return await axios({
 		method: 'put',
 		url: `https://api.github.com/repos/${owner}/${repo}/topics`,
@@ -6169,7 +6171,7 @@ async function addTopics(token, owner, repo) {
 			password: token,
 		},
 		data: {
-			names: ['site', 'wpengine', 'global-ci'],
+			names: topicsArray,
 		},
 	})
 		.then((res) => {
@@ -15659,6 +15661,7 @@ async function run() {
 		const themeRepo = core.getInput('theme_repo', { required: true });
 		const workflowFile = core.getInput('workflow_file', { required: true });
 		// Optional
+		const topicsToSet = core.getInput('topics_to_set');
 		const committerUsername = core.getInput('committer_username');
 		const committerEmail = core.getInput('committer_email');
 		const commitMessage = core.getInput('commit_message');
@@ -15717,10 +15720,12 @@ async function run() {
 		/**
 		 * Add topics
 		 */
-		core.startGroup('Add topics');
-		await addTopics(gitHubKey, owner, repo);
-		core.endGroup();
-
+		if  ( topicsToSet.length ) {
+			core.startGroup('Add topics');
+			await addTopics(gitHubKey, owner, repo, topicsToSet);
+			core.endGroup();
+		}
+		
 		/**
 		 * Remove this workflow.
 		 */
@@ -17342,6 +17347,14 @@ function getAuthanticatedUrl(token, url) {
 	return `https://${token}@${arr[arr.length - 1]}.git`;
 }
 
+/**
+ * @param  {String} list names of values that can be separated by comma
+ * @returns  {Array<String>} input names not separated by string but as separate array items
+ */
+ function parseCommaList(list) {
+	return list.split(',').map(i => i.trim().replace(/['"]+/g, ''));
+  }
+  
 
 /***/ }),
 /* 919 */,
