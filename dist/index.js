@@ -7394,12 +7394,8 @@ module.exports = copySync
 /* 339 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const fs = __webpack_require__(630);
 const path = __webpack_require__(622);
-const axios = __webpack_require__(545);
-const anzip = __webpack_require__(464);
 const rimraf = __webpack_require__(959);
-
 const { getAuthanticatedUrl } = __webpack_require__(918);
 
 module.exports = { handleTheme };
