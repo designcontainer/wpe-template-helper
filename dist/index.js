@@ -51,7 +51,13 @@ module.exports =
 /* 0 */,
 /* 1 */,
 /* 2 */,
-/* 3 */,
+/* 3 */
+/***/ (function(module) {
+
+module.exports = eval("require")("replace");
+
+
+/***/ }),
 /* 4 */,
 /* 5 */,
 /* 6 */,
@@ -7094,7 +7100,28 @@ exports.Scheduler = Scheduler;
 /* 424 */,
 /* 425 */,
 /* 426 */,
-/* 427 */,
+/* 427 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const path = __webpack_require__(622);
+const replace = __webpack_require__(3);
+
+module.exports = { handleComposer };
+
+async function handleComposer(dir, repo) {
+	const composerFile = path.join(dir, 'composer.json');
+
+	replace({
+		regex: 'replace_with_repo_name',
+		replacement: repo,
+		paths: composerFile,
+		recursive: false,
+		silent: false,
+	});
+}
+
+
+/***/ }),
 /* 428 */,
 /* 429 */,
 /* 430 */,
@@ -7754,7 +7781,42 @@ module.exports = esModuleFactory(
 
 /***/ }),
 /* 478 */,
-/* 479 */,
+/* 479 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const fs = __webpack_require__(630);
+const path = __webpack_require__(622);
+
+module.exports = { handleReadme };
+
+async function handleReadme(dir, owner, repo) {
+	const readmeFile = path.join(dir, 'README.md');
+	const content = readmeContent(owner, repo);
+
+	fs.unlinkSync(readmeFile);
+
+	fs.writeFileSync(readmeFile, content);
+}
+
+function readmeContent(owner, repo) {
+	return `
+# ${repo}
+[![Deploy to WP Engine](https://github.com/${owner}/${repo}/actions/workflows/wp-engine.yml/badge.svg)](https://github.com/${owner}/${repo}/actions/workflows/wp-engine.yml)
+
+Short summary of the main functionality and purpose of the project.
+
+## Domains
+#### CNAME
+[${repo}.wpengine.com](https://${repo}.wpengine.com)
+#### WP Engine Admin
+https://my.wpengine.com/installs/${repo}
+## How to build
+## Deployment
+`;
+}
+
+
+/***/ }),
 /* 480 */,
 /* 481 */,
 /* 482 */,
@@ -13534,6 +13596,8 @@ const { mkdir } = __webpack_require__(747).promises;
 const { clone, push, areFilesChanged } = __webpack_require__(374);
 const { handleNewCore } = __webpack_require__(187);
 const { handleTheme } = __webpack_require__(339);
+const { handleComposer } = __webpack_require__(427);
+const { handleReadme } = __webpack_require__(479);
 const { cleanup } = __webpack_require__(767);
 
 const triggerEventName = process.env.GITHUB_EVENT_NAME;
@@ -13548,10 +13612,11 @@ async function run() {
 
 	try {
 		// Action inputs
-		const gitHubKey =
-			process.env.GITHUB_TOKEN || core.getInput('github_token', { required: true });
+		// Required
+		const gitHubKey = core.getInput('github_token', { required: true });
 		const themeRepo = core.getInput('theme_repo', { required: true });
 		const workflowFile = core.getInput('workflow_file', { required: true });
+		// Optional
 		const committerUsername = core.getInput('committer_username');
 		const committerEmail = core.getInput('committer_email');
 		const commitMessage = core.getInput('commit_message');
@@ -13591,6 +13656,27 @@ async function run() {
 		 */
 		core.startGroup('Download the latest starter theme');
 		await handleTheme(gitHubKey, themeUrl, dir, repo, git);
+		core.endGroup();
+
+		/**
+		 * Download the latest starter theme.
+		 */
+		core.startGroup('Modifying composer.json');
+		await handleComposer(dir, repo);
+		core.endGroup();
+
+		/**
+		 * Download the latest starter theme.
+		 */
+		core.startGroup('Modifying composer.json');
+		await handleComposer(dir, repo);
+		core.endGroup();
+
+		/**
+		 * Create a readme.md
+		 */
+		core.startGroup('Create a readme.md');
+		await handleReadme(dir, owner, repo);
 		core.endGroup();
 
 		/**
