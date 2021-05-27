@@ -6164,7 +6164,7 @@ async function addTopics(token, owner, repo) {
 			method: 'PUT',
 			user: `${owner}:${token}`,
 			headers: {
-				Accept: application / vnd.github.mercy - preview + json,
+				Accept: 'Accept: application/vnd.github.mercy-preview+json',
 			},
 			data: {
 				names: ['site', 'wpengine', 'global-ci'],
