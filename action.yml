@@ -7,6 +7,10 @@ inputs:
             It cannot be the default GitHub Actions token GITHUB_TOKEN. GitHub Action token's permissions are limited to the repository that contains your workflows.
             Provide token of the user that has rights to push to the repos that this action is suppose to update.
         required: true
+    workflow_file:
+        description: >
+            The name of this workflow file (including extension)
+        required: true
     theme_repo:
         description: >
             The repo for your starter theme

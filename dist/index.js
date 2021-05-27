@@ -6210,9 +6210,11 @@ const { getAuthanticatedUrl } = __webpack_require__(918);
 module.exports = { handleTheme };
 
 async function handleTheme(token, themeUrl, dir, name, git) {
-	const themes = path.join(dir, 'wp-content', 'themes', name);
-
-	await git.clone(getAuthanticatedUrl(token, themeUrl), themes, { '--depth': 1 });
+	const themeDir = path.join(dir, 'wp-content', 'themes', name);
+	await git.clone(getAuthanticatedUrl(token, themeUrl), themeDir, { '--depth': 1 });
+	// remove the git folder
+	const gitFolder = path.join(themeDir, '.git');
+	rimraf.sync(gitFolder);
 }
 
 
@@ -12897,7 +12899,21 @@ rimraf.sync = rimrafSync
 /* 764 */,
 /* 765 */,
 /* 766 */,
-/* 767 */,
+/* 767 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const path = __webpack_require__(622);
+const rimraf = __webpack_require__(959);
+
+module.exports = { cleanup };
+
+async function cleanup(dir, workflow) {
+	const thisWorkflow = path.join(dir, '.github', 'workflows', workflow);
+	rimraf.sync(thisWorkflow);
+}
+
+
+/***/ }),
 /* 768 */,
 /* 769 */,
 /* 770 */,
@@ -13518,13 +13534,14 @@ const { mkdir } = __webpack_require__(747).promises;
 const { clone, push, areFilesChanged } = __webpack_require__(374);
 const { handleNewCore } = __webpack_require__(187);
 const { handleTheme } = __webpack_require__(339);
+const { cleanup } = __webpack_require__(767);
 
 const triggerEventName = process.env.GITHUB_EVENT_NAME;
 const eventPayload = require(process.env.GITHUB_EVENT_PATH);
 
 async function run() {
-	if (triggerEventName !== 'create')
-		return core.setFailed('This GitHub Action works only when triggered by "create".');
+	if (triggerEventName !== 'push')
+		return core.setFailed('This GitHub Action works only when triggered by "push".');
 
 	core.debug('DEBUG: full payload of the event that triggered the action:');
 	core.debug(JSON.stringify(eventPayload, null, 2));
@@ -13534,6 +13551,7 @@ async function run() {
 		const gitHubKey =
 			process.env.GITHUB_TOKEN || core.getInput('github_token', { required: true });
 		const themeRepo = core.getInput('theme_repo', { required: true });
+		const workflowFile = core.getInput('workflow_file', { required: true });
 		const committerUsername = core.getInput('committer_username');
 		const committerEmail = core.getInput('committer_email');
 		const commitMessage = core.getInput('commit_message');
@@ -13573,6 +13591,13 @@ async function run() {
 		 */
 		core.startGroup('Download the latest starter theme');
 		await handleTheme(gitHubKey, themeUrl, dir, repo, git);
+		core.endGroup();
+
+		/**
+		 * Remove this workflow.
+		 */
+		core.startGroup('Removing this workflow');
+		await cleanup(dir, workflowFile);
 		core.endGroup();
 
 		/**
