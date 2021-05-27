@@ -1,12 +1,13 @@
 # WPE Template helper
-This action handler installation of WordPress and further setup of the [WPE Template](https://github.com/designcontainer/wpe-template)
+This action handles installation of WordPress and further setup of the [WPE Template](https://github.com/designcontainer/wpe-template).
 
 ## Workflow steps
 1. Get the latest version of WordPress.
 2. Get the specified theme and place it in the themes folder.
-3. Set the correct repository name in `composer.json`.
-4. Add the specified topics.
-5. Delete this action from repository.
+3. Set the correct repository name in `composer.json` by replacing the string `replace_with_repo_name` with the repository name.
+4. Replace the original `README.md` with a custom one.
+5. Add the specified topics.
+6. Delete this action from repository.
 ## Supported Event Triggers
 
 This action can be triggered by:
